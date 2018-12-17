@@ -1,0 +1,122 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+/**
+ * This is the class that handles
+ * the score panel for the Tetris
+ * game.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 29 2018
+ */
+public class GUIScorePanel extends JPanel
+{
+    /** A generated serial ID. */
+    private static final long serialVersionUID = -1500113179026395816L;
+    
+    /** The number of lines in each level. */
+    private static final double LINES_PER_LEVEL = 5.0;
+    
+    /** Score mutiplier per line cleared. */
+    private static final int SCORE_MULTIPLIER = 40;
+    
+    /** The title of the score panel. */
+    private final JLabel myTitle;
+    
+    /** The label for the scores. */
+    private final JLabel myScore;
+    
+    /** The label for the lines cleared. */
+    private final JLabel myLines;
+    
+    /** The label for the levels. */
+    private final JLabel myLevel;
+    
+    /** The label for the lines until level up. */
+    private final JLabel myLinesLevelUp;
+    
+    /** The integer representing the score. */
+    private int myScoreNum;
+    
+    /** The integer representing the lines cleared. */
+    private int myLineNum;
+    
+    /** The integer representing how many more lines until level up. */
+    private int myLevelUpNum;
+    
+    /** The integer representing the number of levels cleared. */
+    private int myLevelNum;
+    
+    /**
+     * Initializes the fields for the
+     * scoring panel.
+     */
+    public GUIScorePanel()
+    {
+        myScoreNum = 0;
+        myLineNum = 0;
+        myLevelNum = 1;
+        myLevelUpNum = 0;
+        myTitle = new JLabel("          Tetris Score Board          ");
+        myScore = new JLabel("  Score: 0");
+        myLines = new JLabel("   Lines Cleared: 0");
+        myLinesLevelUp = new JLabel("   Lines Until Level Up: 5");
+        myLevel = new JLabel("   Current Level: 1");
+        setUp();
+    }
+    
+    /**
+     * Sets up the panel by adding the
+     * components to the panel.
+     */
+    private void setUp()
+    {
+        myTitle.setHorizontalAlignment(JLabel.CENTER);
+        add(myTitle);
+        add(myScore);
+        add(myLines);
+        add(myLinesLevelUp);
+        add(myLevel);
+    }
+    
+    /**
+     * Changes the number of lines cleared, lines
+     * until next level up, and score if appropriate. 
+     * 
+     * @param theLineNum The number of lines cleared that round. 
+     */
+    public void changeLine(final int theLineNum)
+    {
+        if (myLineNum != myLineNum + theLineNum)
+        {
+            myLineNum = myLineNum + theLineNum;
+            myLines.setText("   Lines Cleared: " + myLineNum);
+            if ((int) Math.ceil(myLineNum / LINES_PER_LEVEL) != myLevelNum)
+            {
+                myLevelNum = (int) Math.ceil(myLineNum / LINES_PER_LEVEL);
+                myLevel.setText("   Current Level: " + myLevelNum);
+            }
+            myLevelUpNum = (int) LINES_PER_LEVEL - (myLineNum % (int) LINES_PER_LEVEL);
+            changeScore(theLineNum * SCORE_MULTIPLIER * myLevelNum);
+            myLinesLevelUp.setText("   Lines Until Level Up: " + myLevelUpNum);
+        }
+    }
+    
+    /**
+     * Changes the score appropriately.
+     * 
+     * @param theScoreNum The score to add to the current score.
+     */
+    private void changeScore(final int theScoreNum)
+    {
+        myScoreNum = myScoreNum + theScoreNum;
+        myScore.setText("   Score: " + myScoreNum);
+    }
+}

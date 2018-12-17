@@ -1,0 +1,69 @@
+/**
+ * 
+ */
+package view;
+
+import java.awt.GridLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+/**
+ * @author miclo
+ *
+ */
+public class GUIScorePanel extends JPanel
+{
+    private JLabel myTitle;
+    private JLabel myScore;
+    private JLabel myLines;
+    private JLabel myLevel;
+    private int myScoreNum;
+    private int myLineNum;
+    private int myLevelNum;
+    public GUIScorePanel()
+    {
+        myScoreNum = 0;
+        myLineNum = 0;
+        myLevelNum = 0;
+        setLayout(new GridLayout(4,1));
+        setUpScorePanel();
+    }
+    
+    private void setUpScorePanel()
+    {
+        myTitle = new JLabel("Score Board");
+        myTitle.setHorizontalAlignment(JLabel.CENTER);
+        add(myTitle);
+        
+        myScore = new JLabel("   Score: 0");
+        add(myScore);
+        
+        myLines = new JLabel("   Lines Cleared: 0");
+        add(myLines);
+        
+        myLevel = new JLabel("   Current Level: 1");
+        add(myLevel);
+    }
+    
+    public void changeScore(final int theScoreNum)
+    {
+        myScoreNum = myScoreNum + theScoreNum;
+        myScore.setText("   Score: " + myScoreNum);
+    }
+
+    public void changeLine(final int theLineNum)
+    {
+        if(theLineNum != myLineNum)
+        {
+            myLineNum = theLineNum;
+            myLines.setText("   Lines Cleared: " + myLineNum);
+            if((int)Math.ceil(myLineNum/4.0) != myLevelNum)
+            {
+                myLevelNum = (int)Math.ceil(myLineNum/4.0);
+                myLevel.setText("   Current Level: " + myLevelNum);
+                changeScore(100);
+            }
+        }
+    }
+}

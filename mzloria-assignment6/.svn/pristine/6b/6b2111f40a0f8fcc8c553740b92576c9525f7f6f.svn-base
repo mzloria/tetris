@@ -1,0 +1,138 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 5
+ */
+
+package view;
+
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.Action;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+/**
+ * A menu bar used by the GUI.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 16 2018
+ */
+public final class GUIMenuBar extends JMenuBar implements PropertyChangeListener
+{
+
+    /** A generated serial version ID. */
+    private static final long serialVersionUID = -1466326535825525272L;
+
+    /** The amount between major tick spacing in the slider. */
+    private static final int MY_TICK_SPACING = 5;
+    
+    /** A button group for the buttons for the tools. */ 
+    private final ButtonGroup myGroup;
+    
+    /** The JMenu for the tools. */
+    private final JMenu myTools;
+    
+    /** The list of button menu items for the tools. */
+    private final List<JRadioButtonMenuItem> myButtonMenuItems;
+    
+    /** The clear button. */
+    private final JMenuItem myClearButton;
+    
+    /**
+     * Constructs the menu bar for the GUI program.
+     * 
+     * @param theDrawingPanel The drawing panel where the color will be set.
+     */
+    protected GUIMenuBar()
+    {
+        myButtonMenuItems = new ArrayList<>();
+        myClearButton = new JMenuItem("Options");
+        myGroup = new ButtonGroup();
+        myTools = new JMenu("Customize");
+      //  myDrawingPanel.addPropertyChangeListener(this);
+        setUpMenuBar();  
+    }
+    
+    /**
+     * Sets up the JMenuBar with all of the proper 
+     * components.
+     */
+    private void setUpMenuBar()
+    {
+        final JMenu options = new JMenu("Game Options");
+
+        final JMenuItem startGame = new JMenuItem("New Game");
+        final JMenuItem endGame = new JMenuItem("End Game");
+        final JMenuItem pauseGame = new JMenuItem("Pause");
+        
+        options.add(startGame);
+        options.addSeparator();
+        options.add(endGame);
+        options.addSeparator();
+        options.add(pauseGame);
+        
+        
+        final JMenu customize = new JMenu("Customize Game");
+        
+        final JMenu help = new JMenu("Help");
+        
+        final JMenuItem about = new JMenuItem("About");
+        help.add(about);
+        
+        add(options);
+        add(customize);
+        add(help);
+    }
+    
+/*    *//**
+     * Creates a radio button menu item with each respective action,
+     * and adds them to the tool menu and the button group.
+     * 
+     * @param theAction The action associated with each respective JRadioButtonMenuItem.
+     *//*
+    protected void createButton(final Action theAction) 
+    {
+        final JRadioButtonMenuItem radioButtonMenuItem = new JRadioButtonMenuItem(theAction);
+        myButtonMenuItems.add(radioButtonMenuItem);
+        myGroup.add(radioButtonMenuItem);
+        myTools.add(radioButtonMenuItem);
+    }
+    
+    *//**
+     * Sets the default selected button to the first button
+     * added to the button group.
+     *//*
+    protected void setDefault()
+    {
+        myButtonMenuItems.get(0).setSelected(true);
+    }*/
+    
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent)
+    {
+        if (theEvent.getPropertyName().equals("There are items to clear.")) 
+        {
+            myClearButton.setEnabled((boolean) theEvent.getNewValue());
+        }
+        else if (theEvent.getPropertyName().equals("There are no items to clear."))
+        {
+            myClearButton.setEnabled((boolean) theEvent.getNewValue());
+        }
+    }
+    
+}
+

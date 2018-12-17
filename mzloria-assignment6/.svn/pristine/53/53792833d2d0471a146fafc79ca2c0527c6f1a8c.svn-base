@@ -1,0 +1,174 @@
+/**
+ * 
+ */
+package view;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.List;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
+import model.Board;
+import model.MovableTetrisPiece;
+import model.TetrisPiece;
+
+/**
+ * This is the class that handles 
+ * the tetris panel.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 24 2018
+ */
+public class GUITetrisPanel extends JPanel implements ActionListener
+{
+    /** A generated serial ID. */
+    private static final long serialVersionUID = -4872113882123673787L;
+    
+    /** Amount of blocks that can fit in one row. */
+    private static final int NUM_BLOCKS = 10;
+    
+    /** The tetris board. */
+    private final Board myBoard;
+    
+    /** The size of each square. */
+    private int mySquareSize;
+    
+    /** The amount of border added to the board. */
+    private int myBorderSize;
+    
+    /** String representation of the board. */
+    private String myBoardString;
+ 
+    /** Array of string representation of area outside of board. */
+    private String[] myBoardStrings;
+    
+    /** String representation of area outside of board. */
+    private String[] myPreviewStrings;
+    
+    /** The timer for the tetris game. */
+    private Timer myTimer;
+
+    public GUITetrisPanel(Board theBoard)
+    {
+        myTimer = new Timer(1000, this);
+        myBoardStrings = null;
+        myPreviewStrings = null;
+        myBoard = theBoard;
+        mySquareSize = 30;
+        myBorderSize = 5;
+        myTimer.start();
+    }
+
+    public void paintComponent(final Graphics theGraphics)
+    {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                             RenderingHints.VALUE_ANTIALIAS_ON); 
+        if (myBoardStrings != null && myPreviewStrings != null)
+        {
+            for (int i = 0; i < myBoardStrings.length; i++)
+            { 
+                for (int j = 0; j < NUM_BLOCKS; j++)
+                {
+                    if (myBoardStrings[i].charAt(j) != ' ')
+                    {
+                        g2d.setColor(Color.BLUE);
+                        g2d.fillRect(myBorderSize + mySquareSize * j, 
+                                     myBorderSize + mySquareSize * i, 
+                                     mySquareSize, mySquareSize);
+                        g2d.setColor(Color.BLACK);
+                        g2d.drawRect(myBorderSize + mySquareSize * j, 
+                                     myBorderSize + mySquareSize * i, 
+                                     mySquareSize, mySquareSize);
+                    }
+                }
+            }
+        }
+    }
+    
+    public void moveOne()
+    {
+        myBoard.down();
+    }
+    
+    @Override
+    public void actionPerformed(final ActionEvent theEvent)
+    {
+        final Object source = theEvent.getSource();
+        if (source.equals(myTimer))
+        {
+            moveOne();
+        }
+    }
+    
+    public void changeString(String name)
+    {
+        myBoardString = name;
+    }
+    
+    public void currentBoardString()
+    {
+        String[] separateRows = myBoardString.split("----------");
+        String[] previewRows = separateRows[0].trim().split("\\|");
+        String[] boardRows = separateRows[1].trim().split("\\|");
+        
+        String[] boardRowValues = new String[20];
+        String[] previewRowValues = new String[4];
+        
+        int j = 0;
+        for(int i = 0; i < previewRows.length; i++)
+        {
+            
+            if(!previewRows[i].equals("") && !previewRows[i].equals("\n"))
+            {
+                previewRowValues[j] = previewRows[i];
+                j = j + 1;                                
+            }
+        }
+        
+        int k = 0;
+        for(int i = 0; i < boardRows.length; i++)
+        {
+            if(!boardRows[i].equals("") && !boardRows[i].equals("\n"))
+            {
+                boardRowValues[k] = boardRows[i];
+                k = k + 1;                                
+            }     
+        }
+        myBoardStrings = boardRowValues;
+        myPreviewStrings = previewRowValues;
+        
+        System.out.println(myBoardString);
+        for(int i = 0; i < myBoardStrings.length; i++)
+        {
+            System.out.print("START:");
+            System.out.print(myBoardStrings[i]);
+            System.out.println(":END");
+        }
+        for(int i = 0; i < myPreviewStrings.length; i++)
+        {
+            System.out.print("START:");
+            System.out.print(myPreviewStrings[i]);
+            System.out.println(":END");
+        } 
+    }
+    
+    public void gameOver()
+    {
+        myTimer.stop();
+    }
+    
+    
+}

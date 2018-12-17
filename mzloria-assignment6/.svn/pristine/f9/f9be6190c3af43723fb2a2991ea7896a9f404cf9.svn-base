@@ -1,0 +1,283 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
+
+/**
+ * A menu bar used by the GUI.
+ * 
+ * @author Michael Zachary Loria
+ * @version December 3 2018
+ */
+public final class GUIMenuBar extends JMenuBar implements PropertyChangeListener
+{
+    
+    /** A generated serial version ID. */
+    private static final long serialVersionUID = -786830276637425245L;
+    
+    /** The new game menu item String. */
+    private static final String NEW_GAME = "New Game";
+    
+    /** The pause menu item String. */
+    private static final String PAUSE = "Pause";
+
+    /** A button group for the buttons for the tools. */ 
+    private final ButtonGroup myGroup;
+    
+    /** The customize menu. */
+    private final JMenu myCustomize;
+    
+    /** The tetris panel that will be resized. */
+    private final GUITetrisPanel myTetrisPanel;
+    
+    /** The start game menu item. */
+    private final JMenuItem myNewGame;
+    
+    /** The end game menu item. */
+    private final JMenuItem myEndGame;
+    
+    /** The pause game menu item. */
+    private final JMenuItem myPauseGame;
+
+    /**
+     * Constructs the menu bar for the Tetris game.
+     * 
+     * @param theTetrisPanel The tetris panel that will be resized.
+     */
+    protected GUIMenuBar(final GUITetrisPanel theTetrisPanel)
+    {
+        myTetrisPanel = theTetrisPanel;
+        myTetrisPanel.addPropertyChangeListener(this);
+        myNewGame = new JMenuItem(NEW_GAME);
+        myEndGame = new JMenuItem("End Game");
+        myPauseGame = new JMenuItem(PAUSE);
+        myCustomize = new JMenu("Customize Game");
+        myGroup = new ButtonGroup();
+        setUpMenuBar();  
+    }
+    
+    /**
+     * Sets up the JMenuBar with all of the proper 
+     * components.
+     */
+    private void setUpMenuBar()
+    {
+        final JMenu options = new JMenu("Game Options");
+        
+        myNewGame.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theActionEvent)
+            {
+                myTetrisPanel.newGame();
+            }
+        });
+        myNewGame.setAccelerator(KeyStroke.getKeyStroke('n'));
+        myEndGame.setEnabled(false);
+        myEndGame.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theActionEvent)
+            {
+                myTetrisPanel.gameOver();
+            }
+        });
+        myEndGame.setAccelerator(KeyStroke.getKeyStroke('e'));
+        myPauseGame.setEnabled(false);
+        myPauseGame.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theActionEvent)
+            {
+                myTetrisPanel.pauseResumeGame();
+            }
+        });
+        myPauseGame.setAccelerator(KeyStroke.getKeyStroke('p'));
+        options.add(myNewGame);
+        options.addSeparator();
+        options.add(myEndGame);
+        options.addSeparator();
+        options.add(myPauseGame);
+        
+        add(options);
+        final JRadioButtonMenuItem smallBoard = new JRadioButtonMenuItem("Small");
+        smallBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.smallPanel();
+            }
+        });
+        myGroup.add(smallBoard);
+        myCustomize.add(smallBoard);
+        final JRadioButtonMenuItem mediumBoard = new JRadioButtonMenuItem("Medium");
+        mediumBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.mediumPanel();
+            }
+        });
+        myGroup.add(mediumBoard);
+        myCustomize.add(mediumBoard);
+        final JRadioButtonMenuItem largeBoard = new JRadioButtonMenuItem("Large");
+        largeBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.largePanel();
+            }
+        });
+        myGroup.add(largeBoard);
+        myCustomize.add(largeBoard);
+        largeBoard.setSelected(true);
+        
+        final JCheckBoxMenuItem gridLines = new JCheckBoxMenuItem("Grid Lines");
+        
+        gridLines.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.drawGrid();
+            }
+        });
+       
+        myCustomize.addSeparator();
+        myCustomize.add(gridLines);
+        myCustomize.addSeparator();
+        createCustomizeColor();
+        add(myCustomize);
+        createHelp();
+    }
+   
+    /** Creates a radio button menu item with each respective title,
+     * and adds them to the tool menu and the button group.
+     * 
+     * @param theSize The size associated with each respective JRadioButtonMenuItem.
+     */
+    protected void createButton(final String theSize) 
+    {
+        final JRadioButtonMenuItem radioButtonMenuItem = new JRadioButtonMenuItem(theSize);
+        myGroup.add(radioButtonMenuItem);
+        myCustomize.add(radioButtonMenuItem);
+    }
+    
+    /**
+     * Creates the help menu.
+     */
+    private void createHelp()
+    {
+        final JMenu help = new JMenu("Help");
+        final JMenuItem scoring = new JMenuItem("Scoring...");
+        scoring.addActionListener(new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                JOptionPane.showMessageDialog(null,  
+                      "Scoring:\n"
+                      + "Every time a line is cleared, the score will\n"
+                      + "will increase by 40 multiplied by the level. \n"
+                      + "If one or more lines are cleared and you\n"
+                      + "level up in the process, the level multiplier\n"
+                      + "for all lines cleared for that round will be\n"
+                      + "the new level.", 
+                      "Scoring",
+                      JOptionPane.PLAIN_MESSAGE);      
+            }   
+        });
+        help.add(scoring);
+        help.addSeparator();
+        
+        final JMenuItem about = new JMenuItem("About...");
+        about.addActionListener(new ActionListener() 
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                ImageIcon icon = new ImageIcon(getClass().getResource("/tetris.gif"));
+                final Image image =
+                        icon.getImage().getScaledInstance(90, -1, java.awt.Image.SCALE_SMOOTH);
+                icon = new ImageIcon(image);
+                JOptionPane.showMessageDialog(null,  
+                      "Tetris\nMichael Zachary Loria\nTCSS 305\n"
+                      + "December 3, 2018", 
+                      "About",
+                      JOptionPane.INFORMATION_MESSAGE, icon);      
+            }   
+        });
+        help.add(about);
+        add(help);
+    }
+    
+    /**
+     * Creates the color menu item.
+     */
+    private void createCustomizeColor()
+    {
+        final JMenuItem customizeColor = new JMenuItem("Block Color...");
+        customizeColor.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theActionEvent)
+            {
+                final Color currentColor = JColorChooser.showDialog(null, "Color Chooser", 
+                                                    myTetrisPanel.getCurrentBlockColor());
+                if (currentColor != null)
+                {
+                    myTetrisPanel.setCurrentBlockColor(currentColor);
+                    myTetrisPanel.repaint();
+                }
+            }
+            
+        });
+        myCustomize.add(customizeColor);
+    }
+    
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent)
+    {
+        if (theEvent.getPropertyName().equals("Game Over")) 
+        {
+            myNewGame.setEnabled(true);
+            myPauseGame.setEnabled(false);
+            myPauseGame.setText(PAUSE);
+            myEndGame.setEnabled(false);
+        }
+        else if (theEvent.getPropertyName().equals("Pause Resume"))
+        {
+            myPauseGame.setText(theEvent.getNewValue().toString());
+        }
+        else if (theEvent.getPropertyName().equals(NEW_GAME))
+        {
+            myNewGame.setEnabled(false);
+            myPauseGame.setEnabled(true);
+            myEndGame.setEnabled(true);
+        }
+    }
+    
+}
+

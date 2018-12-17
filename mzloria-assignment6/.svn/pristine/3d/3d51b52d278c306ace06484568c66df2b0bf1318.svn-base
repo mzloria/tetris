@@ -1,0 +1,169 @@
+/**
+ * 
+ */
+package view;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+
+import model.Board;
+
+/**
+ * @author miclo
+ *
+ */
+public class GUI implements ActionListener
+{
+    
+    /** The frame for Tetris. */
+    private final JFrame myFrame;
+
+    /** The dimension of the screen. */
+ //   private final Dimension myScreenSize;
+    
+    /** An initial size for the frame. */
+    private static final Dimension INITIAL_SIZE = new Dimension(700,600);
+
+    /** A minimum size for the frame. */
+    private static final Dimension MIN_SIZE = new Dimension(600, 600);
+    
+    /**
+     * The size in pixels of a side of one "square" on the grid.
+     */
+    private static final int SQUARE_SIZE = 40;
+    
+    /** The default width for many components. */
+    private static final int DEFAULT_WIDTH = 160;
+    
+    /** The default height for many components. */
+    private static final int DEFAULT_HEIGHT = 60;
+    
+    /** The default space between components. */
+    private static final int PADDING = 10;
+    
+    /**
+     * The initial frames per second at which the simulation will run.
+     */
+    private static final int INITIAL_FRAMES_PER_SECOND = 10;
+    
+    /** The menu bar for the tetris game. */
+    private GUIMenuBar myMenuBar;
+    
+    /** THe panel for the tetris game. */
+    private GUITetrisPanel myTetrisPanel;
+    
+    /** The timer for the tetris game. */
+    private final Timer myTimer;
+    
+    /** The tetris board. */
+    private Board myBoard;
+    
+    public GUI()
+    {
+        myTimer = new Timer(1000, this);
+        myFrame = new JFrame("Tetris");
+        myMenuBar = new GUIMenuBar();
+        myBoard = new Board();
+        myBoard.newGame();
+        myTetrisPanel = new GUITetrisPanel(myBoard);
+    }
+    
+    public void start()
+    {
+        myTimer.start();
+        setUpEast();
+        setUpCenter();
+        
+        myFrame.setJMenuBar(myMenuBar);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setSize(INITIAL_SIZE);
+        myFrame.setMinimumSize(MIN_SIZE);
+        myFrame.setLocationRelativeTo(null);
+        myFrame.setVisible(true);
+    }
+    
+    private void setUpEast()
+    {
+        final JPanel eastPanel = new JPanel();
+        final BoxLayout b = new BoxLayout(eastPanel, BoxLayout.PAGE_AXIS);
+        eastPanel.setLayout(b);
+        eastPanel.setBackground(new Color(35, 119, 155));
+
+        // Preview Panel
+        final JPanel innerPanel1 = new JPanel();
+        innerPanel1.setBackground(new Color(146, 184, 244));
+        innerPanel1.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        innerPanel1.add(new JLabel("Preview Panel"));
+        
+        // Score Tracker
+        final JPanel innerPanel2 = new JPanel();
+        innerPanel2.setBackground(new Color(146, 184, 244));
+        innerPanel2.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        innerPanel2.add(new JLabel("Score Tracker"));
+
+        // Control Panel
+        final JPanel innerPanel3 = new JPanel();
+        innerPanel3.setBackground(new Color(146, 184, 244));
+        innerPanel3.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_WIDTH));
+        innerPanel3.add(new JLabel("Controls"));
+        
+        eastPanel.add(innerPanel1);
+       
+        eastPanel.add(Box.createVerticalStrut(PADDING));
+        
+        eastPanel.add(innerPanel2);
+        
+        eastPanel.add(Box.createVerticalStrut(PADDING));
+        
+        eastPanel.add(innerPanel3);
+        
+        myFrame.add(eastPanel, BorderLayout.EAST);
+    }
+    
+    private void setUpCenter()
+    {
+       // Border tetrisPanelBorder = new LineBorder(Color.BLACK);
+       // Border tetrisPanelPadding = new EmptyBorder(10,10,10,10);
+      //  myTetrisPanel.setBorder(new CompoundBorder(tetrisPanelPadding,tetrisPanelBorder));
+      //  myTetrisPanel.setPreferredSize(new Dimension(400,400));
+      //  myTetrisPanel.setBorder(BorderFactory.createCompoundBorder(new EmptyBorder(10, 10, 10, 10), new EtchedBorder()));
+       /* myTetrisPanel.setBorder(new EmptyBorder(10,10,10,10));
+        myTetrisPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));*/
+        myFrame.add(myTetrisPanel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent theEvent)
+    {
+        final Object source = theEvent.getSource();
+        if (source.equals(myTimer))
+        {
+            oneStep();
+        }
+    }
+    
+    private void oneStep()
+    {
+        myTetrisPanel.moveOne();
+    }
+
+}

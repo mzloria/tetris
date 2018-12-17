@@ -1,0 +1,42 @@
+/**
+ * 
+ */
+package view;
+
+import java.awt.GridLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+/**
+ * @author miclo
+ *
+ */
+public class GUIControlsPanel extends JPanel
+{
+    public GUIControlsPanel()
+    {
+        setLayout(new GridLayout(11,1));
+        setUpControlsPanel();
+    }
+    
+    private void setUpControlsPanel()
+    {
+        JLabel keyboardShortcuts = new JLabel("Keyboard Shortcuts");
+        keyboardShortcuts.setHorizontalAlignment(JLabel.CENTER);
+        add(keyboardShortcuts);
+        add(new JLabel("    New Game: 'n'"));
+        add(new JLabel("    Pause Game: 'p'"));
+        add(new JLabel("    End Game: 'e'"));
+        add(new JLabel(" "));
+        JLabel gameControls = new JLabel("Game Controls");
+        gameControls.setHorizontalAlignment(JLabel.CENTER);
+        add(gameControls);
+        add(new JLabel("    Move Left: Left Arrow or 'a'"));
+        add(new JLabel("    Move Right: Right Arrow or 'd'"));
+        add(new JLabel("    Move Down: Down Arrow or 's'"));
+        add(new JLabel("    Rotate: Up Arrow or 'w'"));
+        add(new JLabel("    Drop: Space")); 
+    }
+
+}

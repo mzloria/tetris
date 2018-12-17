@@ -1,0 +1,322 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+import model.Board;
+
+/**
+ * This is the class that handles 
+ * the tetris panel.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 29 2018
+ */
+public class GUITetrisPanel extends JPanel implements ActionListener
+{
+    /** A generated serial ID. */
+    private static final long serialVersionUID = -4872113882123673787L;
+    
+    /** An large (default) size for the Tetris panel. */
+    private static final Dimension LARGE_PANEL_SIZE = new Dimension(321, 616);
+    
+    /** An medium size for the Tetris panel. */
+    private static final Dimension MEDIUM_PANEL_SIZE = new Dimension(221, 416);
+    
+    /** An medium size for the Tetris panel. */
+    private static final Dimension SMALL_PANEL_SIZE = new Dimension(121, 216);
+
+    /** Amount of blocks that can fit in one row. */
+    private static final int NUM_BLOCKS = 10;
+    
+    /** Aount of blocks that can fit in one column. */
+    private static final int COLUMN_BLOCKS = 20;
+    
+    /** Default tetris block size. */
+    private static final int LARGE_BLOCK_SIZE = 30;
+    
+    /** Default tetris block size. */
+    private static final int MEDIUM_BLOCK_SIZE = 20;
+    
+    /** Default tetris block size. */
+    private static final int SMALL_BLOCK_SIZE = 10;
+    
+    /** Default tetris horizontal spacing. */
+    private static final int DEFAULT_HORIZONTAL = 10;
+    
+    /** Default tetris vertical spacing. */
+    private static final int DEFAULT_VERTICAL = 5;
+    
+    /** Delay of timer. */
+    private static final int TIMER_DELAY = 1000;
+    
+    /** Draw string offset multiplier. */
+    private static final int DRAW_STRING_OFFSET = 3;
+    
+    /** The color when drawing text. */
+    private static final Color DRAW_TEXT_COLOR = new Color(255, 148, 0);
+    
+    /** The string for the property change for pause and resume. */
+    private static final String PAUSE_RESUME = "Pause Resume";
+    
+    /** The string for the property change for game over. */
+    private static final String GAME_OVER = "Game Over";
+    
+    /** The tetris board. */
+    private final Board myBoard;
+    
+    /** Support for firing property change events from this class. */
+    private final PropertyChangeSupport myPCS;
+    
+    /** The size of each square. */
+    private int mySquareSize;
+    
+    /** The amount added to the y coordinate of each block to center it in the panel. */
+    private int myHorizontalOffset;
+    
+    /** The amount added to the x coordinate of each block to center it in the panel. */
+    private int myVerticalOffset;
+    
+    /** String representation of the board. */
+    private String myBoardString;
+ 
+    /** Array of string representation of board. */
+    private String[] myBoardStrings;
+    
+    /** The timer for the tetris game. */
+    private Timer myTimer;
+    
+    /** Game over value. */
+    private boolean myGameOver;
+    
+    /** Game pause value. */
+    private boolean myPause;
+
+    /**
+     * Initializes the fields.
+     * 
+     * @param theBoard The board where the Tetris game is played on.
+     */
+    protected GUITetrisPanel(final Board theBoard)
+    {
+       // myState = false;
+       // myGameOver = false;
+        myPCS = new PropertyChangeSupport(this);
+        myHorizontalOffset = DEFAULT_HORIZONTAL;
+        myVerticalOffset = DEFAULT_VERTICAL;
+        myTimer = new Timer(TIMER_DELAY, this);
+        myBoardStrings = null;
+        myBoard = theBoard;
+        setPreferredSize(LARGE_PANEL_SIZE);
+        mySquareSize = LARGE_BLOCK_SIZE;
+        largePanel();
+    }
+
+    @Override
+    public void paintComponent(final Graphics theGraphics)
+    {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                             RenderingHints.VALUE_ANTIALIAS_ON); 
+
+        if (myBoardStrings != null)
+        {
+            for (int i = 0; i < myBoardStrings.length; i++)
+            { 
+                for (int j = 0; j < NUM_BLOCKS; j++)
+                {
+                    if (myBoardStrings[i].charAt(j) != ' ')
+                    {
+                        g2d.setColor(Color.BLUE);
+                        g2d.fillRect(myHorizontalOffset + mySquareSize * j, 
+                                     myVerticalOffset + mySquareSize * i, 
+                                     mySquareSize, mySquareSize);
+                        g2d.setColor(new Color(0, 0, 0));
+                        g2d.drawRect(myHorizontalOffset + mySquareSize * j, 
+                                     myVerticalOffset + mySquareSize * i, 
+                                     mySquareSize, mySquareSize);
+                    }
+                }
+            }
+        }
+        g2d.setFont(new Font("Gill Sans", Font.PLAIN, mySquareSize));
+        if (myGameOver)
+        {
+            g2d.setColor(DRAW_TEXT_COLOR);
+            g2d.drawString(GAME_OVER, myHorizontalOffset + mySquareSize 
+                           * DRAW_STRING_OFFSET, myVerticalOffset + mySquareSize
+                           * DRAW_STRING_OFFSET);
+        }
+        if (myPause)
+        {
+            g2d.setColor(Color.BLACK);
+            g2d.fillRect(myHorizontalOffset, myVerticalOffset, 
+                         NUM_BLOCKS * mySquareSize + 1, COLUMN_BLOCKS * mySquareSize + 1);
+            g2d.setColor(DRAW_TEXT_COLOR);
+            g2d.drawString("Paused", myHorizontalOffset + mySquareSize 
+                           * DRAW_STRING_OFFSET, myVerticalOffset + mySquareSize
+                           * DRAW_STRING_OFFSET);            
+        }
+    }
+    
+    @Override
+    public void actionPerformed(final ActionEvent theEvent)
+    {
+        final Object source = theEvent.getSource();
+        if (source.equals(myTimer))
+        {
+            myBoard.down();
+        }
+    }
+    
+    /**
+     * Properly parses the string representation
+     * of the board.
+     * 
+     * @param theBoardString The string representation of the board.
+     */
+    protected void currentBoardString(final String theBoardString)
+    {
+        myBoardString = theBoardString;
+        final String[] separateRows = myBoardString.split("----------");
+        final String[] boardRows = separateRows[1].trim().split("\\|");
+        final String[] boardRowValues = new String[COLUMN_BLOCKS];
+        
+        int k = 0;
+        for (int i = 0; i < boardRows.length; i++)
+        {
+            if (!boardRows[i].equals("") && !boardRows[i].equals("\n"))
+            {
+                boardRowValues[k] = boardRows[i];
+                k = k + 1;                                
+            }     
+        }
+        myBoardStrings = boardRowValues;
+    }
+    
+    /**
+     * Stops timer when game is over. 
+     */
+    protected void gameOver()
+    {
+        myPause = false;
+        myGameOver = true;
+        repaint();
+        myTimer.stop();
+        myPCS.firePropertyChange(GAME_OVER, false, true);
+    }
+    
+    /**
+     * Pause and resumes game.
+     */
+    protected void pauseResumeGame()
+    {
+        if (myTimer.isRunning())
+        {
+            myPause = true;
+            myTimer.stop();
+            repaint();
+            myPCS.firePropertyChange(PAUSE_RESUME, false, "Resume");
+        }
+        else
+        {
+            myPause = false;
+            myTimer.start();
+            repaint();
+            myPCS.firePropertyChange(PAUSE_RESUME, false, "Pause");
+        }
+    }
+    
+    /** Starts a new game. */
+    protected void newGame()
+    {
+        myGameOver = false;
+        myBoard.newGame();
+        myTimer.restart();
+        myPCS.firePropertyChange("New Game", false, true);
+    }
+    
+    /**
+     * Resizes the tetris panel to a small size.
+     */
+    protected void smallPanel()
+    {
+        setSize(SMALL_PANEL_SIZE);
+        setPreferredSize(SMALL_PANEL_SIZE);
+        mySquareSize = SMALL_BLOCK_SIZE;
+        revalidate();
+    }
+    
+    /**
+     * Resizes the tetris panel to a medium size.
+     */
+    protected void mediumPanel()
+    {
+        setSize(MEDIUM_PANEL_SIZE);
+        setPreferredSize(MEDIUM_PANEL_SIZE);
+        mySquareSize = MEDIUM_BLOCK_SIZE;
+        revalidate();
+    }
+    
+    /**
+     * Resizes the tetris panel to a large (default) size.
+     */
+    protected void largePanel()
+    {
+        setSize(LARGE_PANEL_SIZE);
+        setPreferredSize(LARGE_PANEL_SIZE);
+        mySquareSize = LARGE_BLOCK_SIZE;
+        revalidate();
+    }
+    
+    /**
+     * Adds a listener for property change events.
+     * 
+     * @param theListener The PropertyChangeListener that will be added.
+     */
+    public void addPropertyChangeListener(final PropertyChangeListener theListener) 
+    {
+        myPCS.addPropertyChangeListener(theListener);
+    }
+    
+    /**
+     * Removes a listener for property change events.
+     * 
+     * @param theListener The PropertyChangeListener that will be removed.
+     */
+    public void removePropertyChangeListener(final PropertyChangeListener theListener) 
+    {
+        myPCS.removePropertyChangeListener(theListener);
+    }
+    
+    /**
+     * Returns whether or not the timer is running.
+     * 
+     * @return True if timer is running; false otherwise.
+     */
+    public boolean getState()
+    {
+        return myTimer.isRunning();
+    }
+    
+    protected void speedUp()
+    {
+        myTimer.setDelay((int)(.75 * myTimer.getDelay()));
+    }
+ 
+}

@@ -1,0 +1,197 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import model.Board;
+
+/**
+ * This is the class that handles
+ * the graphical user interface
+ * for the tetris game.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 29 2018
+ */
+public class GUI implements PropertyChangeListener
+{   
+    /** An initial size for the frame. */
+    private static final Dimension INITIAL_SIZE = new Dimension(550, 680);
+
+    /** Default size for the preview panel. */
+    private static final Dimension DEFAULT_SIZE_PREVIEW_PANEL = new Dimension(140, 100);
+    
+    /** The default width for many components. */
+    private static final int DEFAULT_WIDTH = 220;
+    
+    /** The default height for many components. */
+    private static final int DEFAULT_HEIGHT = 60;
+    
+    /** The default border padding. */
+    private static final Border BORDER_PADDING = new EmptyBorder(5, 5, 5, 5);
+    
+    /** The border padding for the tetris panel. */
+    private static final Border TETRIS_PANEL_PADDING = new EmptyBorder(0, 5, 5, 5);
+    
+    /** The default border of the components. */
+    private static final Border PANEL_BORDER = 
+            BorderFactory.createStrokeBorder(new BasicStroke(5.0f));
+    
+    /** The default background color. */
+    private static final Color DEFAULT_COLOR = new Color(223, 231, 242);
+    
+    /** The frame for Tetris. */
+    private final JFrame myFrame;
+    
+    /** The menu bar for the tetris game. */
+    private GUIMenuBar myMenuBar;
+    
+    /** THe panel for the tetris game. */
+    private GUITetrisPanel myTetrisPanel;
+    
+    /** THe panel for the controls. */
+    private GUIControlsPanel myControlsPanel;
+    
+    /** THe panel for the score. */
+    private GUIScorePanel myScorePanel;
+    
+    /** THe panel for the preview. */
+    private GUIPreviewPanel myPreviewPanel;
+    
+    /** The tetris board. */
+    private Board myBoard;
+    
+    /** The icon for the tetris game. */
+    private final ImageIcon myIcon;
+    
+    /**
+     * Sets up the graphical user interface for
+     * the Tetris game.
+     */
+    protected GUI()
+    {
+        myIcon = new ImageIcon(getClass().getResource("/tetris.gif"));
+        myControlsPanel = new GUIControlsPanel();
+        myPreviewPanel = new GUIPreviewPanel();
+        myBoard = new Board();
+        myTetrisPanel = new GUITetrisPanel(myBoard);
+        myScorePanel = new GUIScorePanel(myTetrisPanel);
+        myFrame = new JFrame("Tetris");
+        myMenuBar = new GUIMenuBar(myTetrisPanel);
+        myBoard.addPropertyChangeListener(this);
+    }
+    
+    /**
+     * Sets up the center and east portions of the frame.
+     */
+    protected void setUp()
+    {
+        final Image image = myIcon.getImage().getScaledInstance(15, -1, 
+                                                                java.awt.Image.SCALE_SMOOTH);
+        myFrame.setIconImage(image);
+        setUpEast();
+        setUpCenter();
+        
+        myFrame.addKeyListener(new TetrisKeyAdapter(myBoard, myTetrisPanel));
+        myFrame.setJMenuBar(myMenuBar);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setSize(INITIAL_SIZE);
+        myFrame.setLocationRelativeTo(null);
+        myFrame.setResizable(false);
+        myFrame.setVisible(true);
+    }
+   
+    /**
+     * Sets up the east border of the GUI.
+     */
+    private void setUpEast()
+    {
+        final JPanel eastPanel = new JPanel();
+        final BoxLayout b = new BoxLayout(eastPanel, BoxLayout.PAGE_AXIS);
+        eastPanel.setLayout(b);
+        eastPanel.setBackground(DEFAULT_COLOR);
+
+        // Preview Panel
+        final JPanel innerPanel1 = new JPanel();
+        innerPanel1.setBackground(DEFAULT_COLOR);
+        innerPanel1.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        innerPanel1.setBorder(new CompoundBorder(BORDER_PADDING, PANEL_BORDER));
+        innerPanel1.add(new JLabel("Next Piece"));
+        
+        innerPanel1.add(myPreviewPanel);
+        myPreviewPanel.setBackground(DEFAULT_COLOR);
+        myPreviewPanel.setPreferredSize(DEFAULT_SIZE_PREVIEW_PANEL);
+        
+        // Score Tracker
+        myScorePanel.setBackground(DEFAULT_COLOR);
+        myScorePanel.setSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        myScorePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        myScorePanel.setBorder(new CompoundBorder(BORDER_PADDING, PANEL_BORDER));
+
+        // Control Panel
+        myControlsPanel.setBackground(DEFAULT_COLOR);
+        myControlsPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_WIDTH));
+        myControlsPanel.setBorder(new CompoundBorder(BORDER_PADDING, PANEL_BORDER));
+        
+        eastPanel.add(innerPanel1);
+        eastPanel.add(myScorePanel);
+        eastPanel.add(myControlsPanel);
+        myFrame.add(eastPanel, BorderLayout.EAST);
+    }
+    
+    /**
+     * Sets up the center panel.
+     */
+    private void setUpCenter()
+    {
+        final JPanel tetrisPanelHolder = new JPanel();     
+        myTetrisPanel.setBorder(new CompoundBorder(TETRIS_PANEL_PADDING, PANEL_BORDER));
+        myTetrisPanel.setBackground(DEFAULT_COLOR);
+        tetrisPanelHolder.add(myTetrisPanel);
+        tetrisPanelHolder.setBackground(DEFAULT_COLOR);
+        myFrame.add(tetrisPanelHolder, BorderLayout.CENTER);
+    }
+    
+    @Override
+    public void propertyChange(final PropertyChangeEvent theEvent)
+    {
+        if (theEvent.getPropertyName().equals("piece moved")) 
+        {
+            myTetrisPanel.currentBoardString((String) theEvent.getNewValue());
+            myTetrisPanel.repaint();
+        }
+        else if (theEvent.getPropertyName().equals("lines cleared"))
+        {
+            final Integer[] linesCleared = (Integer[]) theEvent.getNewValue();
+            myScorePanel.changeLine(linesCleared.length);
+        }
+        else if (theEvent.getPropertyName().equals("preview"))
+        {
+            final String preview = (String) theEvent.getNewValue();
+            myPreviewPanel.drawPreview(preview);
+        }
+        else if (theEvent.getPropertyName().equals("game over"))
+        {
+            myTetrisPanel.gameOver();
+        }
+    }
+}

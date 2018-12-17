@@ -1,0 +1,19 @@
+/**
+ * 
+ */
+package view;
+
+import javax.swing.JPanel;
+
+/**
+ * @author miclo
+ *
+ */
+public class GUIPreviewPanel extends JPanel
+{
+    public GUIPreviewPanel()
+    {
+        
+    }
+
+}

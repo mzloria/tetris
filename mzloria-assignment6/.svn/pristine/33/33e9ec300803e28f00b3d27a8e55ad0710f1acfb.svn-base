@@ -1,0 +1,139 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ButtonGroup;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.KeyStroke;
+
+/**
+ * A menu bar used by the GUI.
+ * 
+ * @author Michael Zachary Loria
+ * @version November 16 2018
+ */
+public final class GUIMenuBar extends JMenuBar
+{
+    
+    /** A generated serial version ID. */
+    private static final long serialVersionUID = -786830276637425245L;
+
+    /** A button group for the buttons for the tools. */ 
+    private final ButtonGroup myGroup;
+    
+    /** The list of button menu items for the tools. */
+    private final List<JRadioButtonMenuItem> myButtonMenuItems;
+    
+    /** The customize menu. */
+    private final JMenu myCustomize;
+    
+    /** The tetris panel that will be resized. */
+    private final GUITetrisPanel myTetrisPanel;
+
+    /**
+     * Constructs the menu bar for the Tetris game.
+     * 
+     * @param theTetrisPanel The tetris panel that will be resized.
+     */
+    protected GUIMenuBar(final GUITetrisPanel theTetrisPanel)
+    {
+        myTetrisPanel = theTetrisPanel;
+        myCustomize = new JMenu("Customize Game");
+        myButtonMenuItems = new ArrayList<>();
+        myGroup = new ButtonGroup();
+        setUpMenuBar();  
+    }
+    
+    /**
+     * Sets up the JMenuBar with all of the proper 
+     * components.
+     */
+    private void setUpMenuBar()
+    {
+        final JMenu options = new JMenu("Game Options");
+
+        final JMenuItem startGame = new JMenuItem("New Game");
+        startGame.setAccelerator(KeyStroke.getKeyStroke('n'));
+        final JMenuItem endGame = new JMenuItem("End Game");
+        endGame.setAccelerator(KeyStroke.getKeyStroke('e'));
+        final JMenuItem pauseGame = new JMenuItem("Pause");
+        pauseGame.setAccelerator(KeyStroke.getKeyStroke('p'));
+        
+        options.add(startGame);
+        options.addSeparator();
+        options.add(endGame);
+        options.addSeparator();
+        options.add(pauseGame);
+        
+        final JMenu help = new JMenu("Help");
+        
+        final JMenuItem about = new JMenuItem("About");
+        help.add(about);
+        
+        add(options);
+        final JRadioButtonMenuItem smallBoard = new JRadioButtonMenuItem("Small");
+        smallBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.smallPanel();
+            }
+        });
+        myButtonMenuItems.add(smallBoard);
+        myGroup.add(smallBoard);
+        myCustomize.add(smallBoard);
+        final JRadioButtonMenuItem mediumBoard = new JRadioButtonMenuItem("Medium");
+        mediumBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.mediumPanel();
+            }
+        });
+        myButtonMenuItems.add(mediumBoard);
+        myGroup.add(mediumBoard);
+        myCustomize.add(mediumBoard);
+        final JRadioButtonMenuItem largeBoard = new JRadioButtonMenuItem("Large");
+        largeBoard.addActionListener(new ActionListener()
+        {
+            @Override
+            public void actionPerformed(final ActionEvent theEvent)
+            {
+                myTetrisPanel.largePanel();
+            }
+        });
+        myButtonMenuItems.add(largeBoard);
+        myGroup.add(largeBoard);
+        myCustomize.add(largeBoard);
+        largeBoard.setSelected(true);
+        add(myCustomize);
+        add(help);
+    }
+   
+    /** Creates a radio button menu item with each respective title,
+     * and adds them to the tool menu and the button group.
+     * 
+     * @param theSize The size associated with each respective JRadioButtonMenuItem.
+     */
+    protected void createButton(final String theSize) 
+    {
+        final JRadioButtonMenuItem radioButtonMenuItem = new JRadioButtonMenuItem(theSize);
+        myButtonMenuItems.add(radioButtonMenuItem);
+        myGroup.add(radioButtonMenuItem);
+        myCustomize.add(radioButtonMenuItem);
+    }
+    
+}
+

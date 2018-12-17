@@ -1,0 +1,200 @@
+/**
+ * 
+ */
+package view;
+
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.Timer;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.LineBorder;
+
+import model.Board;
+
+/**
+ * @author miclo
+ *
+ */
+public class GUI implements ActionListener
+{
+    
+    /** The frame for Tetris. */
+    private final JFrame myFrame;
+    
+    /** An initial size for the frame. */
+    private static final Dimension INITIAL_SIZE = new Dimension(555,685);
+
+    /** A minimum size for the frame. */
+    private static final Dimension MIN_SIZE = new Dimension(555,685);
+    
+    /** The size in pixels of a side of one "square" on the grid. */
+    private static final int SQUARE_SIZE = 40;
+    
+    /** The default width for many components. */
+    private static final int DEFAULT_WIDTH = 220;
+    
+    /** The default height for many components. */
+    private static final int DEFAULT_HEIGHT = 60;
+    
+    /** The default space between components. */
+    private static final int PADDING = 10;
+    
+    /**
+     * The initial frames per second at which the simulation will run.
+     */
+    private static final int INITIAL_FRAMES_PER_SECOND = 10;
+    
+    /** The menu bar for the tetris game. */
+    private GUIMenuBar myMenuBar;
+    
+    /** The panel that holds the panel for the game. */
+    private JPanel myPanel;
+    
+    /** THe panel for the tetris game. */
+    private GUITetrisPanel myTetrisPanel;
+    
+    /** THe panel for the controls. */
+    private GUIControlsPanel myControlsPanel;
+    
+    /** THe pnael for the score. */
+    private GUIScorePanel myScorePanel;
+    
+    /** THe panel for hte preview. */
+    private GUIPreviewPanel myPreviewPanel;
+    
+    /** The timer for the tetris game. */
+    private final Timer myTimer;
+    
+    /** The tetris board. */
+    private Board myBoard;
+    
+    public GUI()
+    {
+        myPanel = new JPanel();
+        myTimer = new Timer(1000, this);
+        myFrame = new JFrame("Tetris");
+        myMenuBar = new GUIMenuBar();
+        myBoard = new Board();
+        
+        myControlsPanel = new GUIControlsPanel();
+        myScorePanel = new GUIScorePanel();
+        myPreviewPanel = new GUIPreviewPanel();
+        myTetrisPanel = new GUITetrisPanel(myBoard, myScorePanel, myPreviewPanel, myTimer);
+        myBoard.newGame();
+        
+    }
+    
+    public void start()
+    {
+        myTimer.start();
+        setUpEast();
+        setUpCenter();
+        
+        myFrame.addKeyListener(new TetrisKeyAdapter(myBoard));
+        myFrame.setJMenuBar(myMenuBar);
+        myFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        myFrame.setSize(INITIAL_SIZE);
+        myFrame.setMinimumSize(MIN_SIZE);
+        myFrame.setLocationRelativeTo(null);
+        myFrame.setResizable(false);
+        myFrame.setVisible(true);
+    }
+   
+    
+    private void setUpEast()
+    {
+        final JPanel eastPanel = new JPanel();
+        final BoxLayout b = new BoxLayout(eastPanel, BoxLayout.PAGE_AXIS);
+        eastPanel.setLayout(b);
+        eastPanel.setBackground(new Color(35, 119, 155));
+
+        // Preview Panel
+        final JPanel innerPanel1 = new JPanel();
+        innerPanel1.setBackground(new Color(146, 184, 244));
+        innerPanel1.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+        innerPanel1.add(new JLabel("Next Piece"));
+        myPreviewPanel.setPreferredSize(new Dimension(200,115));
+        innerPanel1.add(myPreviewPanel);
+        
+        // Score Tracker
+        myScorePanel.setBackground(new Color(146, 184, 244));
+        myScorePanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_HEIGHT));
+
+        Border scorePanelBorder = BorderFactory.createStrokeBorder(new BasicStroke(5.0f));
+        Border scorePanelPadding = new EmptyBorder(5,5,5,5);
+        myScorePanel.setBorder(new CompoundBorder(scorePanelPadding,scorePanelBorder));
+
+        // Control Panel
+        //final JPanel innerPanel3 = new JPanel();
+        myControlsPanel.setBackground(new Color(146, 184, 244));
+        myControlsPanel.setPreferredSize(new Dimension(DEFAULT_WIDTH, DEFAULT_WIDTH));
+        
+        Border tetrisPanelBorder = BorderFactory.createStrokeBorder(new BasicStroke(5.0f));
+        Border tetrisPanelPadding = new EmptyBorder(5,5,5,5);
+        myControlsPanel.setBorder(new CompoundBorder(tetrisPanelPadding,tetrisPanelBorder));
+        
+        eastPanel.add(innerPanel1);
+       
+        eastPanel.add(Box.createVerticalStrut(PADDING));
+        
+        eastPanel.add(myScorePanel);
+        
+        eastPanel.add(Box.createVerticalStrut(PADDING));
+        
+        eastPanel.add(myControlsPanel);
+        
+        myFrame.add(eastPanel, BorderLayout.EAST);
+    }
+    
+    private void setUpCenter()
+    {
+        
+        Border tetrisPanelBorder = BorderFactory.createStrokeBorder(new BasicStroke(5.0f));
+        Border tetrisPanelPadding = new EmptyBorder(5,5,5,5);
+        myTetrisPanel.setBorder(new CompoundBorder(tetrisPanelPadding,tetrisPanelBorder));
+        myTetrisPanel.setPreferredSize(new Dimension(315,615));
+        myPanel.add(myTetrisPanel);
+        myFrame.add(myPanel, BorderLayout.CENTER);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent theEvent)
+    {
+        final Object source = theEvent.getSource();
+        if (source.equals(myTimer))
+        {
+            oneStep();
+        }
+    }
+    
+    private void oneStep()
+    {
+        myTetrisPanel.moveOne();
+    }
+    
+    public void pausePlay()
+    {
+        myTimer.stop();
+    }
+
+}

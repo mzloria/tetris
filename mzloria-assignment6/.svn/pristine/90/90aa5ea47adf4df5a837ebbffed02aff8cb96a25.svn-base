@@ -1,0 +1,92 @@
+/*
+ * TCSS 305 Autumn 2018
+ * Assignment 6
+ */
+
+package view;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import javax.swing.JPanel;
+
+/**
+ * This is the class that handles
+ * the panel for the preview Tetris
+ * piece.
+ * 
+ * @author Michael Zachary Loria
+ * @version December 3 2018
+ */
+public class GUIPreviewPanel extends JPanel
+{
+    /** A generated serial ID. */
+    private static final long serialVersionUID = 3160965700588550057L;
+    
+    /** Default tetris block size. */
+    private static final int DEFAULT_BLOCK_SIZE = 30;
+    
+    /** Longest block width. */
+    private static final int LONGEST_BLOCK_WIDTH = 4;
+    
+    /** Amount of padding for the preview piece. */
+    private static final int PREVIEW_PADDING = 10;
+
+    /** The String array that represents the next Tetris piece. */
+    private String[] myStringPreview;
+    
+    /** The size of each block. */
+    private int myBlockSize;
+
+    /**
+     * Initializes the block size.
+     */
+    public GUIPreviewPanel()
+    {
+        myBlockSize = DEFAULT_BLOCK_SIZE;
+        myStringPreview = new String[LONGEST_BLOCK_WIDTH];
+        for (int i = 0; i < LONGEST_BLOCK_WIDTH; i++)
+        {
+            myStringPreview[i] = "    ";
+        }
+    }
+    
+    @Override
+    public void paintComponent(final Graphics theGraphics)
+    {
+        super.paintComponent(theGraphics);
+        final Graphics2D g2d = (Graphics2D) theGraphics;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                             RenderingHints.VALUE_ANTIALIAS_ON); 
+        for (int i = 0; i < myStringPreview.length; i++)
+        {
+            for (int j = 0; j < LONGEST_BLOCK_WIDTH; j++)
+            {
+                if (myStringPreview[i].charAt(j) != ' ')
+                {
+                    g2d.setColor(Color.BLUE);
+                    g2d.fillRect(PREVIEW_PADDING + myBlockSize * j, 
+                                 myBlockSize * i, 
+                                 myBlockSize, myBlockSize);
+                    g2d.setColor(Color.BLACK);
+                    g2d.drawRect(PREVIEW_PADDING + myBlockSize * j, 
+                                 myBlockSize * i, 
+                                 myBlockSize, myBlockSize);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Draws the preview piece given the
+     * correct string.
+     * 
+     * @param thePreview The string representation of the preview piece.
+     */
+    public void drawPreview(final String thePreview)
+    {
+        myStringPreview = thePreview.split("\n");
+        repaint();
+    }
+}
